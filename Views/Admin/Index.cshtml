@@ -1,0 +1,57 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Panel de Administración";
+    var username = Context.Session.GetString("Username") ?? "Invitado";
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h2>
+            <i class="fas fa-user-shield text-success"></i> 
+            Bienvenido/a <strong>@username</strong> al <span class="text-success">Panel de Administración</span>
+        </h2>
+        <p class="lead">Desde aquí podrás gestionar el personal, usuarios, reclusos y acceder a los reportes.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <!-- Tarjeta 1 -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg h-100 text-center p-4">
+                <i class="fas fa-users fa-4x text-success mb-3"></i>
+                <h4 class="mb-2">Gestionar Personal</h4>
+                <p>Agrega, edita o inactiva al personal asignado.</p>
+                <a asp-controller="Personal" asp-action="Index" class="btn btn-success">Ir</a>
+            </div>
+        </div>
+
+        <!-- Tarjeta 2 -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg h-100 text-center p-4">
+                <i class="fas fa-user-cog fa-4x text-success mb-3"></i>
+                <h4 class="mb-2">Usuarios del Sistema</h4>
+                <p>Maneja credenciales y roles de acceso.</p>
+                <a asp-controller="Usuarios" asp-action="Index" class="btn btn-success">Ir</a>
+            </div>
+        </div>
+
+        <!-- Tarjeta 3 -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg h-100 text-center p-4">
+                <i class="fas fa-user-lock fa-4x text-success mb-3"></i>
+                <h4 class="mb-2">Reclusos</h4>
+                <p>Administra los datos de los privados de libertad.</p>
+                <a asp-controller="Reclusos" asp-action="Index" class="btn btn-success">Ir</a>
+            </div>
+        </div>
+
+        <!-- Tarjeta 4 -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg h-100 text-center p-4">
+                <i class="fas fa-file-pdf fa-4x text-success mb-3"></i>
+                <h4 class="mb-2">Reportes</h4>
+                <p>Visualiza y genera reportes de visitas.</p>
+                <a href="/Reportes/VisitasGenerales" target="_blank" class="btn btn-success">Ver</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Iniciar Sesión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="~/adminlte/plugins/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/estilos.css" />
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-logo">
+            <img src="~/img/escudo.jpg" alt="Escudo Policial" />
+            <div>Sistema <span style="color: #4d633a;">Cárcel</span></div>
+        </div>
+
+        <p class="login-box-msg">Inicia sesión para continuar</p>
+
+        <form asp-action="Login" method="post">
+            <div class="custom-input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="Username" placeholder="Usuario" required />
+            </div>
+
+            <div class="custom-input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" name="Password" placeholder="Contraseña" required />
+                <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
+            </div>
+
+            <button type="submit" class="btn btn-login">Ingresar</button>
+        </form>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger text-center mt-3">
+                <i class="fas fa-exclamation-triangle"></i> @ViewBag.Error
+            </div>
+        }
+    </div>
+
+    <script src="~/adminlte/plugins/jquery/jquery.min.js"></script>
+    <script>
+        const toggle = document.getElementById("togglePassword");
+        const password = document.getElementById("password");
+
+        toggle.addEventListener("click", () => {
+            const type = password.getAttribute("type") === "password" ? "text" : "password";
+            password.setAttribute("type", type);
+            toggle.classList.toggle("fa-eye");
+            toggle.classList.toggle("fa-eye-slash");
+        });
+    </script>
+</body>
+</html>

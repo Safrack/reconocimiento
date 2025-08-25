@@ -1,0 +1,104 @@
+@model List<SistemaCarcel.Models.Visitante>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Reporte General de Visitantes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .header-info div {
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .titulo-principal {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .subtitulo {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="titulo-principal">Cárcel de San Roque</div>
+    <div class="subtitulo">Reporte General de Visitantes</div>
+
+    <div class="header-info">
+        <div><strong>Fecha:</strong> @DateTime.Now.ToString("dd/MM/yyyy")</div>
+        <div><strong>Hora:</strong> @DateTime.Now.ToString("HH:mm")</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>CI</th>
+                <th>Edad</th>
+                <th>Parentesco</th>
+                <th>Privado de Libertad</th>
+                <th>Pabellón</th>
+                <th>Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var v in Model)
+            {
+                <tr>
+                    <td>@v.NombreCompleto</td>
+                    <td>@v.Ci</td>
+                    <td>@v.Edad</td>
+                    <td>@v.Parentesco</td>
+                    <td>@v.NombrePrivadoLibertad</td>
+                    <td>@v.Pabellon?.NombrePb</td>
+                    <td>@v.Hora.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</body>
+</html>

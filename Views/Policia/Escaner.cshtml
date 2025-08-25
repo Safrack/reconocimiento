@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Escáner Facial";
+}
+
+<h2>Escáner Facial</h2>
+<video id="video" width="640" height="480" autoplay></video>
+<canvas id="canvas" style="display:none;"></canvas>
+<br />
+<button id="btnEscanear" class="btn btn-primary">Escanear Rostro</button>
+<p id="resultado" class="mt-3 font-weight-bold"></p>
+
+@section Scripts {
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const resultado = document.getElementById('resultado');
+        const ctx = canvas.getContext('2d');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                alert('Error al acceder a la cámara: ' + err);
+            });
+
+        document.getElementById('btnEscanear').addEventListener('click', () => {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+
+            fetch('http://localhost:5000/reconocer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imagen: dataUrl })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.autorizado) {
+                    resultado.innerText = `✅ Autorizado\nNombre: ${data.nombre}\nCI: ${data.ci}\nPabellón: ${data.pabellon}`;
+                    resultado.style.color = 'green';
+                } else {
+                    resultado.innerText = "❌ No autorizado";
+                    resultado.style.color = 'red';
+                }
+            })
+            .catch(err => {
+                resultado.innerText = "❌ Error en la verificación";
+                resultado.style.color = 'red';
+            });
+        });
+    </script>
+}

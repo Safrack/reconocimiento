@@ -1,0 +1,49 @@
+@model List<SistemaCarcel.Models.Visitante>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Visitas por Período</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Cárcel de San Roque - Visitas por Período</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre Visitante</th>
+                <th>CI</th>
+                <th>Privado de Libertad</th>
+                <th>Pabellón</th>
+                <th>Registrado por</th>
+                <th>Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>@v.NombreCompleto</td>
+                <td>@v.Ci</td>
+                <td>@v.NombrePrivadoLibertad</td>
+                <td>@v.Pabellon?.NombrePb</td>
+                <td>@(v.Personal?.Usuario ?? "Sistema")</td>
+                <td>@v.Hora.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Escáner Facial";
+}
+
+<h2 class="text-center text-primary">Escáner Facial - Policía</h2>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6 text-center">
+        <video id="videoCamara" autoplay muted class="border border-secondary rounded" style="width: 100%; height: auto;"></video>
+        <button id="btnEscanear" class="btn btn-success mt-3"><i class="fas fa-search"></i> Escanear Rostro</button>
+        <input type="hidden" id="imagenBase64" />
+    </div>
+</div>
+
+<div class="row justify-content-center mt-3">
+    <div class="col-md-6">
+        <div id="resultado" class="alert text-center d-none"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let video = document.getElementById('videoCamara');
+        let imagenBase64 = document.getElementById('imagenBase64');
+        let resultado = document.getElementById('resultado');
+
+        // Activar cámara
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function (err) {
+                alert("No se pudo acceder a la cámara: " + err);
+            });
+
+        document.getElementById('btnEscanear').addEventListener('click', function () {
+            let canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let dataURL = canvas.toDataURL('image/png');
+            imagenBase64.value = dataURL;
+
+            resultado.classList.add("d-none");
+
+            fetch('http://localhost:5000/reconocer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imagen: dataURL })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    resultado.classList.remove("d-none");
+                    if (data.autorizado) {
+                        resultado.classList.remove("alert-danger");
+                        resultado.classList.add("alert-success");
+                        resultado.innerText = `Autorizado: ${data.nombre} | CI: ${data.ci} | Pabellón: ${data.pabellon}`;
+                    } else {
+                        resultado.classList.remove("alert-success");
+                        resultado.classList.add("alert-danger");
+                        resultado.innerText = "No autorizado o visitante no registrado.";
+                    }
+                })
+                .catch(error => {
+                    resultado.classList.remove("alert-success");
+                    resultado.classList.add("alert-danger");
+                    resultado.classList.remove("d-none");
+                    resultado.innerText = "Error al conectar con el sistema de reconocimiento.";
+                    console.error(error);
+                });
+        });
+    </script>
+}

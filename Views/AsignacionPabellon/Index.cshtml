@@ -1,0 +1,28 @@
+@model IEnumerable<SistemaCarcel.Models.AsignacionPabellonPol>
+@{
+    ViewData["Title"] = "Listado de Asignaciones";
+}
+<h2>Asignaciones</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Personal</th>
+            <th>Pabellón</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Personal.Nombre</td>
+            <td>@item.Pabellon.NombrePb</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<a asp-action="Create" class="btn btn-primary">Nueva Asignación</a>

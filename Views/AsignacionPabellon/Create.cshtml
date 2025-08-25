@@ -1,0 +1,32 @@
+@model SistemaCarcel.Models.AsignacionPabellonPol
+@{
+    ViewData["Title"] = "Nueva Asignación";
+}
+
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Asignar policía a pabellón</h3>
+    </div>
+    <form asp-action="Create">
+        <div class="card-body">
+            <div class="form-group">
+                <label asp-for="IdPersonal" class="control-label">Policía</label>
+                <select asp-for="IdPersonal" class="form-control" asp-items="ViewBag.IdPersonal">
+                    <option value="">Seleccione un policía</option>
+                </select>
+                <span asp-validation-for="IdPersonal" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdPabellon" class="control-label">Pabellón</label>
+                <select asp-for="IdPabellon" class="form-control" asp-items="ViewBag.IdPabellon">
+                    <option value="">Seleccione un pabellón</option>
+                </select>
+                <span asp-validation-for="IdPabellon" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,116 @@
+@model IEnumerable<SistemaCarcel.Models.User>
+@{
+    ViewData["Title"] = "Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-3 text-success">Gestión de Usuarios</h2>
+
+<!-- Filtros -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" id="buscarUsuario" class="form-control" placeholder="Buscar por nombre de usuario...">
+    </div>
+    <div class="col-md-6">
+        <select id="filtroRol" class="form-control">
+            <option value="">-- Filtrar por rol --</option>
+            <option value="administrador">Administrador</option>
+            <option value="tecnico">Técnico</option>
+            <option value="policia">Policía</option>
+        </select>
+    </div>
+</div>
+
+<!-- Tabla -->
+<table class="table table-bordered table-hover table-striped" id="tablaUsuarios">
+    <thead class="thead-dark text-center">
+        <tr>
+            <th>#</th>
+            <th>Nombre de Usuario</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{ int i = 1; }
+        @foreach (var user in Model)
+        {
+            <tr data-id="@user.Id" id="fila-@user.Id" class="text-center">
+                <td>@i</td>
+                <td class="td-username">@user.Username</td>
+                <td class="td-rol">@user.Rol</td>
+                <td class="td-estado">
+                    @if (user.Estado)
+                    {
+                        <span class="badge bg-success">Habilitado</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inhabilitado</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-info btn-editar" data-id="@user.Id">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <a href="#" class="btn btn-sm btn-toggle-estado @(user.Estado ? "btn-danger" : "btn-success")"
+                        data-id="@user.Id"
+                        data-estado="@user.Estado"
+                        data-nombre="@user.Username">
+                        <i class="fas @(user.Estado ? "fa-ban" : "fa-check")"></i>
+                        @(user.Estado ? "Inhabilitar" : "Habilitar")
+                    </a>
+                </td>
+                
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>
+
+<!-- MODAL DE EDICIÓN -->
+<div class="modal fade" id="modalEditar" tabindex="-1" role="dialog" aria-labelledby="editarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered animate__animated animate__fadeInDown" role="document">
+        <div class="modal-content shadow rounded">
+            <form id="formEditarUsuario">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Editar Usuario</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="userId" />
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold">Nombre de Usuario</label>
+                        <input type="text" id="username" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Rol</label>
+                        <select id="rol" class="form-control">
+                            <option value="administrador">Administrador</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="policia">Policía</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+                    <div class="d-flex gap-2">
+                        <button type="button" id="limpiar" class="btn btn-warning px-3">Limpiar</button>
+                        <button type="submit" class="btn btn-success px-3">Guardar</button>
+                        <button type="button" class="btn btn-secondary px-3" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="~/js/usuarios.js"></script>
+}

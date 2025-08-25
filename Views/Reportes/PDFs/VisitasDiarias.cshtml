@@ -1,0 +1,89 @@
+@model List<SistemaCarcel.Models.Visitante>
+@{
+    Layout = null;
+    var fechaHoy = DateTime.Now.ToString("dd/MM/yyyy");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Reporte Diario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        .titulo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitulo {
+            text-align: right;
+            font-size: 12px;
+        }
+        .info {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 6px;
+            text-align: center;
+        }
+        th {
+            background-color: #eee;
+        }
+        .encabezado {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="titulo">
+        <h2>CÁRCEL DE SAN ROQUE</h2>
+        <h3>Reporte Diario de Visitas</h3>
+    </div>
+
+    <div class="subtitulo">
+        <strong>Fecha:</strong> @fechaHoy
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>CI</th>
+                <th>Edad</th>
+                <th>Parentesco</th>
+                <th>Privado de Libertad</th>
+                <th>Pabellón</th>
+                <th>Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>@v.NombreCompleto</td>
+                <td>@v.Ci</td>
+                <td>@v.Edad</td>
+                <td>@v.Parentesco</td>
+                <td>@v.NombrePrivadoLibertad</td>
+                <td>@v.Pabellon?.NombrePb</td>
+                <td>@v.Hora.ToString("HH:mm:ss")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+</body>
+</html>

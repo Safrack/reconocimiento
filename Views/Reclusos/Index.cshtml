@@ -1,0 +1,122 @@
+@model IEnumerable<SistemaCarcel.Models.Recluso>
+@{
+    ViewData["Title"] = "Lista de Reclusos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-3 text-success">Lista de Reclusos</h2>
+
+<div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+    <input type="text" id="buscarRecluso" class="form-control" placeholder="Buscar por nombre o CI..." style="width: 220px;" />
+    
+    <select id="filtroPabellon" class="form-control" style="width: 180px;">
+        <option value="">Todos los Pabellones</option>
+        <option value="Pabellón 4">Pabellón 4</option>
+        <option value="Población">Población</option>
+        <option value="Mujeres">Mujeres</option>
+    </select>
+
+    <label class="mb-0">Desde:</label>
+    <input type="date" id="filtroDesde" class="form-control" style="width: 160px;" />
+
+    <label class="mb-0">Hasta:</label>
+    <input type="date" id="filtroHasta" class="form-control" style="width: 160px;" />
+</div>
+
+<button class="btn btn-success mb-3" id="btnAgregar">Agregar Recluso</button>
+
+<table class="table table-bordered table-hover" id="tablaReclusos">
+    <thead class="thead-dark">
+        <tr>
+            <th>#</th>
+            <th>Nombre Completo</th>
+            <th>CI</th>
+            <th>Edad</th>
+            <th>Delito</th>
+            <th>Fecha Ingreso</th>
+            <th>Pabellón</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tbodyReclusos">
+        @{
+            int contador = 1;
+        }
+        @foreach (var r in Model.OrderBy(r => r.IdRecluso))
+        {
+            <tr data-id="@r.IdRecluso">
+                <td>@contador</td>
+                <td class="nombre">@r.NombreCompleto</td>
+                <td class="ci">@r.Ci</td>
+                <td class="edad">@r.Edad</td>
+                <td class="delito">@r.Delito</td>
+                <td class="fechaIngreso">@r.FechaIngreso.ToString("yyyy-MM-dd")</td>
+                <td class="pabellon">@r.Pabellon?.NombrePb</td>
+                <td>
+                    <button class="btn btn-sm btn-info btn-editar" data-id="@r.IdRecluso">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </button>
+                </td>
+            </tr>
+            contador++;
+        }
+    </tbody>
+</table>
+
+<!-- MODAL -->
+<div class="modal fade" id="modalRecluso" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="formRecluso">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalReclusoLabel">Gestión de Recluso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="idRecluso" name="IdRecluso" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label>Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombreCompleto" name="NombreCompleto" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label>CI</label>
+                            <input type="text" class="form-control" id="ci" name="Ci" pattern="^[0-9]{6,8}(-[A-Za-z0-9]{1,3})?$" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Edad</label>
+                            <input type="number" class="form-control" id="edad" name="Edad" min="18" max="99" required />
+                        </div>
+                        <div class="col-md-8">
+                            <label>Delito</label>
+                            <input type="text" class="form-control" id="delito" name="Delito" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Fecha Ingreso</label>
+                            <input type="date" class="form-control" id="fechaIngreso" name="FechaIngreso" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Pabellón</label>
+                            <select class="form-control" id="pabellonId" name="IdPabellon" required>
+                                <option value="">Seleccione un pabellón</option>
+                                @foreach (var p in (IEnumerable<SistemaCarcel.Models.Pabellon>)ViewBag.Pabellones)
+                                {
+                                    <option value="@p.Id">@p.NombrePb</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="limpiar" class="btn btn-warning">Limpiar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary btn-cancelar">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/recluso.js"></script>
+}

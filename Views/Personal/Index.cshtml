@@ -1,0 +1,138 @@
+@model IEnumerable<SistemaCarcel.Models.Personal>
+
+@{
+    ViewData["Title"] = "Gestionar Personal";
+}
+
+<h2 class="mb-3 text-success">Gestionar Personal</h2>
+<button class="btn btn-success mb-3" id="btnAgregar">Agregar Personal</button>
+
+<table class="table table-bordered" id="tablaPersonal">
+    <thead>
+        <tr class="thead-dark">
+            <th>#</th>
+            <th>Nombre</th>
+            <th>CI</th>
+            <th>Cargo</th>
+            <th>Sexo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tbodyPersonal">
+        @{
+            int contador = 1;
+        }
+        @foreach (var persona in Model.OrderBy(p => p.Nombre))
+{
+    <tr data-id="@persona.IdPersonal" data-fecha="@(persona.FechaNacimiento.HasValue ? persona.FechaNacimiento.Value.ToString("yyyy-MM-dd") : "")">
+    <td class="contador">@contador</td>
+    <td class="nombre">@persona.Nombre @persona.Apellidos</td>
+    <td class="ci">@persona.Ci</td>
+    <td class="cargo">@persona.Cargo</td>
+    <td class="sexo">@persona.Sexo</td>
+    <td>
+        <button class="btn btn-warning btn-sm btn-editar">
+            <i class="bi bi-pencil-square"></i> Editar
+        </button>
+
+        @if (persona.Users != null && persona.Users.Any())
+        {
+            <button class="btn btn-secondary btn-sm btn-modificar-usuario" data-id="@persona.IdPersonal">
+                <i class="bi bi-person-lines-fill"></i> Modificar Usuario
+            </button>
+        }
+        else
+        {
+            <button class="btn btn-primary btn-sm btn-usuario" data-id="@persona.IdPersonal">
+                <i class="bi bi-person-plus-fill"></i> Agregar Usuario
+            </button>
+        }
+    </td>
+</tr>
+    contador++;
+}
+
+    </tbody>
+</table>
+
+<!-- MODAL PERSONAL -->
+<div class="modal fade" id="modalPersonal" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="formPersonal" class="modal-content" method="post">
+            <div class="modal-header">
+                <h5 class="modal-title">Gestión de Personal</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="idPersonal" name="IdPersonal" />
+                <div class="mb-2"><label>Nombre</label><input type="text" class="form-control" id="nombre" name="Nombre" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="El nombre solo puede contener letras" /></div>
+                <div class="mb-2"><label>Apellidos</label><input type="text" class="form-control" id="apellidos" name="Apellidos" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Los apellidos solo pueden contener letras" /></div>
+                <div class="mb-2"><label>CI</label><input type="text" class="form-control" id="ci" name="Ci" required pattern="^[0-9]{6,8}(-[A-Za-z0-9]{1,3})?$" title="Formato CI inválido. Ej: 12345678 o 12345678-1K" /></div>
+                <div class="mb-2">
+                    <label>Fecha de Nacimiento</label>
+                    <input type="date" class="form-control" id="fechaNacimiento" name="FechaNacimiento" required />
+                </div>
+                <div class="mb-2"><label>Sexo</label>
+                    <select class="form-control" id="sexo" name="Sexo" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select>
+                </div>
+                <div class="mb-2"><label>Cargo</label><input type="text" class="form-control" id="cargo" name="Cargo" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo letras" /></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="limpiar" class="btn btn-warning">Limpiar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary btn-cancelar-personal">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL USUARIO -->
+<div class="modal fade" id="modalUsuario" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="formUsuario" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="idUsuario" name="Id" />
+                <input type="hidden" id="idPersonalUsuario" name="IdPersonal" />
+                <div class="mb-2"><label>Usuario</label><input type="text" class="form-control" id="username" name="Username" required /></div>
+                <div class="mb-2"><label>Contraseña</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="Password" required />
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-2"><label>Rol</label>
+                    <select class="form-control" name="Rol" required>
+                        <option value="">Seleccione...</option>
+                        <option value="administrador">Administrador</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="policia">Policía</option>
+                    </select>
+                </div>
+                <div class="mb-2"><label>Estado</label>
+                    <select class="form-control" name="Estado" required>
+                        <option value="true">Activo</option>
+                        <option value="false">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary btn-cancelar-usuario">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/personal.js"></script>
+}
