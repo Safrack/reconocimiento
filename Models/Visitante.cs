@@ -51,6 +51,9 @@ public class Visitante
     [Column("id_personal")]
     public int? IdPersonal { get; set; }
 
+    [Column("con_ninos")]
+    public bool ConNinos { get; set; } = false;
+    
     [ForeignKey("IdPabellon")]
     public virtual Pabellon Pabellon { get; set; } = null!;
     public virtual Personal? Personal { get; set; }

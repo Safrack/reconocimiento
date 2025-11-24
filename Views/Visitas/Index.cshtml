@@ -1,0 +1,44 @@
+@model IEnumerable<SistemaCarcel.Models.Visitante>
+@{
+    ViewData["Title"] = "Lista de Visitantes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-3 text-success">Lista de Visitas</h2>
+
+<div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+    <input type="text" id="buscarRecluso" class="form-control" placeholder="Buscar por nombre o CI..." style="width: 220px;" />
+    
+    <select id="filtroPabellon" class="form-control" style="width: 180px;">
+        <option value="">Todos los Pabellones</option>
+        <option value="Pabellón 4">Pabellón 4</option>
+        <option value="Población">Población</option>
+        <option value="Mujeres">Mujeres</option>
+    </select>
+
+    <label class="mb-0">Desde:</label>
+    <input type="date" id="filtroDesde" class="form-control" style="width: 160px;" />
+
+    <label class="mb-0">Hasta:</label>
+    <input type="date" id="filtroHasta" class="form-control" style="width: 160px;" />
+</div>
+
+<button class="btn btn-success mb-3" id="btnAgregar">Agregar Recluso</button>
+
+<table class="table table-bordered table-hover" id="tablaReclusos">
+    <thead class="thead-dark">
+        <tr>
+            <th>#</th>
+            <th>Nombre Completo</th>
+            <th>CI</th>
+            <th>Edad</th>
+            <th>Delito</th>
+            <th>Fecha Ingreso</th>
+            <th>Pabellón</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tbodyReclusos">
+       
+    </tbody>
+</table>

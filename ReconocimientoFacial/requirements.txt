@@ -1,6 +1,9 @@
-face-recognition
-opencv-python
-dlib
-numpy==1.26.0
 flask
 flask-cors
+facenet-pytorch
+torch
+torchvision
+opencv-python
+psycopg2-binary
+numpy
+pillow

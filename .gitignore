@@ -1,0 +1,19 @@
+# --- 1. C# .NET (Backend) ---
+bin/
+obj/
+.vs/
+*.user
+
+# --- 2. Python (Reconocimiento Facial) ---
+# Ignora la carpeta venv310
+**/venv310/
+**/__pycache__/
+*.pyc
+
+# --- 3. JavaScript /
+node_modules/
+npm-debug.log
+
+# --- 4. Archivos de Sistema ---
+.DS_Store
+Thumbs.db

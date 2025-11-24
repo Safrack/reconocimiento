@@ -67,10 +67,13 @@
                 <input type="hidden" id="idPersonal" name="IdPersonal" />
                 <div class="mb-2"><label>Nombre</label><input type="text" class="form-control" id="nombre" name="Nombre" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="El nombre solo puede contener letras" /></div>
                 <div class="mb-2"><label>Apellidos</label><input type="text" class="form-control" id="apellidos" name="Apellidos" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Los apellidos solo pueden contener letras" /></div>
-                <div class="mb-2"><label>CI</label><input type="text" class="form-control" id="ci" name="Ci" required pattern="^[0-9]{6,8}(-[A-Za-z0-9]{1,3})?$" title="Formato CI inválido. Ej: 12345678 o 12345678-1K" /></div>
+                <div class="mb-2">
+                <label>CI</label><input type="text" class="form-control" id="ci" name="Ci" required pattern="^[0-9]{6,8}(-[A-Za-z0-9]{1,3})?$" title="Formato CI inválido. Ej: 12345678 o 12345678-1K" /></div>
+                
                 <div class="mb-2">
                     <label>Fecha de Nacimiento</label>
                     <input type="date" class="form-control" id="fechaNacimiento" name="FechaNacimiento" required />
+                    
                 </div>
                 <div class="mb-2"><label>Sexo</label>
                     <select class="form-control" id="sexo" name="Sexo" required>

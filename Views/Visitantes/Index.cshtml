@@ -1,119 +1,136 @@
 @model IEnumerable<SistemaCarcel.Models.Visitante>
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     ViewData["Title"] = "Visitantes";
 }
 
-<h2>Visitantes</h2>
-<button class="btn btn-success mb-3" id="btnAgregarVisitante">Registrar Visitante</button>
+<h1>Visitantes</h1>
 
-<table class="table table-bordered">
+<div class="row mb-3">
+    <div class="col-md-3">
+        <label>Pabellón</label>
+        <select class="form-control" id="pabellonFilter">
+            <option value="">Todos</option>
+            @foreach (var pabellon in ViewBag.PabellonId as SelectList)
+            {
+                <option value="@pabellon.Value">@pabellon.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label>Fecha Exacta</label>
+        <input type="date" id="fechaExactaFilter" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>Fecha Inicio</label>
+        <input type="date" id="fechaInicioFilter" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>Fecha Fin</label>
+        <input type="date" id="fechaFinFilter" class="form-control" />
+    </div>
+</div>
+
+<!-- Formulario oculto para enviar datos al servidor -->
+<form id="formReporte" method="post" asp-action="GenerarReporte" asp-controller="Visitantes">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="data" id="dataReporte" />
+</form>
+
+<button id="generarReporte" class="btn btn-success mb-3">Generar Reporte</button>
+
+<table class="table table-bordered table-striped" id="visitantesTable">
     <thead>
         <tr>
+            <th>#</th>
             <th>Nombre</th>
-            <th>CI</th>
-            <th>Edad</th>
-            <th>Parentesco</th>
-            <th>Privado de Libertad</th>
             <th>Pabellón</th>
-            <th>Hora</th>
-            <th>Estado</th>
+            <th>Edad</th>
+            <th>Recluso Asociado</th>
+            <th>Fecha/Hora</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var v in Model)
-        {
-            <tr>
-                <td>@v.NombreCompleto</td>
-                <td>@v.Ci</td>
-                <td>@v.Edad</td>
-                <td>@v.Parentesco</td>
-                <td>@v.NombrePrivadoLibertad</td>
-                <td>@v.Pabellon.NombrePb</td>
-                <td>@v.Hora.ToString("g")</td>
-                <td>@(v.Estado ? "Activo" : "Inactivo")</td>
-            </tr>
+        @{
+            int contador = 1;
+            foreach (var v in Model.OrderBy(x => x.Id))
+            {
+                <tr data-pabellon="@v.IdPabellon" data-fecha="@v.Hora.ToString("yyyy-MM-dd")">
+                    <td>@contador</td>
+                    <td>@v.NombreCompleto</td>
+                    <td>@v.Pabellon?.NombrePb</td>
+                    <td>@v.Edad</td>
+                    <td>@v.NombrePrivadoLibertad</td>
+                    <td>@v.Hora.ToString("yyyy-MM-dd HH:mm")</td>
+                </tr>
+                contador++;
+            }
         }
     </tbody>
 </table>
 
-<!-- Modal Visitante -->
-<div class="modal fade" id="modalVisitante" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <form id="formVisitante" class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Registrar Visitante</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Nombre Completo</label>
-                        <input type="text" name="NombreCompleto" class="form-control" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="NombreCompleto" data-valmsg-replace="true"></span>
-                    </div>
-                    <div class="form-group">
-                        <label>CI</label>
-                        <input type="text" name="Ci" class="form-control" required pattern="^[0-9]{6,8}(-[A-Za-z0-9]{1,3})?$" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Ci" data-valmsg-replace="true"></span>
-                    </div>
-                    <div class="form-group">
-                        <label>Edad</label>
-                        <input type="number" name="Edad" class="form-control" min="18" max="99" required />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Edad" data-valmsg-replace="true"></span>
-                    </div>
-                    <div class="form-group">
-                        <label>Parentesco</label>
-                        <input type="text" name="Parentesco" class="form-control" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Parentesco" data-valmsg-replace="true"></span>
-                    </div>
-                    <div class="form-group">
-                        <label>Privado de Libertad</label>
-                        <select id="selectRecluso" name="NombrePrivadoLibertad" class="form-control" required>
-                            <option value="">Seleccione...</option>
-                            @foreach (var r in ViewBag.Reclusos as List<SistemaCarcel.Models.Recluso>)
-                            {
-                                <option value="@r.NombreCompleto">@r.NombreCompleto</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Pabellón</label>
-                        <select name="IdPabellon" class="form-control" required>
-                        <option value="">Seleccione un pabellón...</option>
-                            @foreach (var p in ViewBag.PabellonId as SelectList)
-                            {
-                                <option value="@p.Value">@p.Text</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Captura de Foto</label><br />
-                        <video id="videoCamara" width="100%" autoplay></video>
-                        <canvas id="canvasFoto" width="640" height="480" style="display:none;"></canvas>
-                        <input type="hidden" id="imagenBase64" name="Imagen" />
-                        <button type="button" id="btnCapturar" class="btn btn-secondary btn-sm mt-2">Capturar Foto</button>
-                        <img id="previewImg" src="#" alt="Previsualización" class="img-thumbnail mt-2" style="display:none;" />
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <button type="button" class="btn btn-secondary btn-cancelar-visitante">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
+<script>
+    // Función de filtrado de filas
+    function filtrar() {
+        var pabellon = document.getElementById('pabellonFilter').value;
+        var fechaExacta = document.getElementById('fechaExactaFilter').value;
+        var fechaInicio = document.getElementById('fechaInicioFilter').value;
+        var fechaFin = document.getElementById('fechaFinFilter').value;
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+        document.querySelectorAll('#visitantesTable tbody tr').forEach(row => {
+            var rowPabellon = row.getAttribute('data-pabellon');
+            var rowFecha = row.getAttribute('data-fecha');
+            var mostrar = true;
 
-    <!-- Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            if (pabellon && rowPabellon !== pabellon) mostrar = false;
+            if (fechaExacta && rowFecha !== fechaExacta) mostrar = false;
+            if (fechaInicio && rowFecha < fechaInicio) mostrar = false;
+            if (fechaFin && rowFecha > fechaFin) mostrar = false;
 
-    <script src="~/js/visitantes.js"></script>
-}
+            row.style.display = mostrar ? "" : "none";
+        });
+    }
+
+    // Asignar evento a los filtros
+    ['pabellonFilter','fechaExactaFilter','fechaInicioFilter','fechaFinFilter'].forEach(id => {
+        document.getElementById(id).addEventListener('change', filtrar);
+    });
+
+    // Evento del botón Generar Reporte
+   document.getElementById('generarReporte').addEventListener('click', function () {
+    var filasVisibles = Array.from(document.querySelectorAll('#visitantesTable tbody tr'))
+                              .filter(r => r.style.display !== 'none');
+
+    if(filasVisibles.length === 0){
+        alert("No hay datos para generar el reporte.");
+        return;
+    }
+
+    var datos = filasVisibles.map((r, index) => ({
+        Id: index + 1,
+        Nombre: r.cells[1].innerText,
+        Pabellon: r.cells[2].innerText,
+        Edad: parseInt(r.cells[3].innerText),
+        Recluso: r.cells[4].innerText,
+        Fecha: r.cells[5].innerText
+    }));
+
+    fetch('/Visitantes/GenerarReporte', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "Reporte_Visitantes.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    })
+    .catch(err => console.error(err));
+});
+</script>

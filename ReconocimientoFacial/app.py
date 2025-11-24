@@ -1,32 +1,35 @@
-import face_recognition
-import cv2
 import os
-import psycopg2
+import base64
+import pickle
+import torch
 import numpy as np
+from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import base64
+from facenet_pytorch import MTCNN, InceptionResnetV1
+import psycopg2
+import io 
 
-# --- Cargar rostros conocidos una vez ---
-known_faces_dir = 'known_faces'
-known_encodings = []
-known_names = []
+# --- Inicialización ---
+app = Flask(__name__)
+CORS(app)
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-for filename in os.listdir(known_faces_dir):
-    if filename.endswith(".jpg") or filename.endswith(".png"):
-        image = face_recognition.load_image_file(os.path.join(known_faces_dir, filename))
-        encodings = face_recognition.face_encodings(image)
-        if encodings:
-            known_encodings.append(encodings[0])
-            known_names.append(filename.split('.')[0])
+# --- Cargar embeddings ---
+with open('embeddings.pkl', 'rb') as f:
+    known_faces = pickle.load(f)
 
-# --- Base de datos solo cuando se necesita ---
+# --- Inicializar modelos ---
+mtcnn = MTCNN(image_size=160, margin=20, keep_all=False, device=device)
+resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)
+
+# --- Función para base de datos ---
 def get_pabellon_por_ci(ci):
     try:
         conn = psycopg2.connect(
             dbname="proyecto_carcel",
             user="postgres",
-            password="lu123",
+            password="admin123",
             host="localhost",
             port="5432"
         )
@@ -42,50 +45,62 @@ def get_pabellon_por_ci(ci):
         conn.close()
         return result[0] if result else "No registrado"
     except Exception as e:
+        print("⚠️ Error de BD:", e)
         return "Error de BD"
 
-# --- Flask App ---
-app = Flask(__name__)
-CORS(app)
+# --- Ruta principal ---
+@app.route('/')
+def home():
+    return "Servidor de reconocimiento facial funcionando!"
 
+# --- Ruta de reconocimiento ---
 @app.route('/reconocer', methods=['POST'])
 def reconocer():
-    data = request.get_json()
-    imagen_base64 = data.get('imagen')
-
-    if not imagen_base64:
-        return jsonify({'autorizado': False, 'error': 'No se recibió imagen'})
-
     try:
+        data = request.get_json()
+        imagen_base64 = data.get('imagen')
+
+        if not imagen_base64:
+            return jsonify({'autorizado': False, 'error': 'No se recibió imagen'})
+
+        # --- Decodificar imagen ---
         content = imagen_base64.split(',')[1]
         img_bytes = base64.b64decode(content)
-        np_arr = np.frombuffer(img_bytes, np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        rgb_frame = frame[:, :, ::-1]
+        img = Image.open(io.BytesIO(img_bytes)).convert('RGB')
 
-        face_locations = face_recognition.face_locations(rgb_frame)
-        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+        # --- Detectar y codificar rostro ---
+        face_tensor = mtcnn(img)
+        if face_tensor is None:
+            return jsonify({'autorizado': False, 'error': 'No se detectó rostro'})
 
-        for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(known_encodings, face_encoding)
-            face_distances = face_recognition.face_distance(known_encodings, face_encoding)
-            best_match_index = face_distances.argmin() if len(face_distances) > 0 else -1
+        face_embedding = resnet(face_tensor.unsqueeze(0).to(device))
 
-            if best_match_index >= 0 and matches[best_match_index]:
-                name_ci = known_names[best_match_index]
-                if "_" in name_ci:
-                    nombre, ci = name_ci.split("_", 1)
-                    pabellon = get_pabellon_por_ci(ci)
-                    return jsonify({
-                        'autorizado': True,
-                        'nombre': nombre,
-                        'ci': ci,
-                        'pabellon': pabellon
-                    })
+        # --- Comparar con conocidos ---
+        min_dist = float('inf')
+        identity = None
 
-        return jsonify({'autorizado': False})
+        for known in known_faces:
+            dist = (face_embedding - known['embedding'].to(device)).norm().item()
+            if dist < min_dist:
+                min_dist = dist
+                identity = known['name']
+
+        if min_dist < 0.9:  # <-- umbral de reconocimiento
+            nombre, ci = identity.split('_', 1)
+            pabellon = get_pabellon_por_ci(ci)
+            return jsonify({
+                'autorizado': True,
+                'nombre': nombre,
+                'ci': ci,
+                'pabellon': pabellon
+            })
+
+        return jsonify({'autorizado': False, 'error': 'Rostro no reconocido'})
+
     except Exception as e:
+        print("⚠️ Error interno:", e)
         return jsonify({'autorizado': False, 'error': str(e)})
 
+# --- Ejecutar servidor ---
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

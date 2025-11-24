@@ -4,6 +4,7 @@ let context = null;
 let stream = null;
 
 $(document).ready(function () {
+    // Abrir modal para agregar visitante
     $('#btnAgregarVisitante').click(function () {
         $('#formVisitante')[0].reset();
         $('#previewImg').hide();
@@ -11,11 +12,13 @@ $(document).ready(function () {
         iniciarCamara();
     });
 
+    // Cancelar modal y detener cámara
     $('.btn-cancelar-visitante').click(function () {
         detenerCamara();
         $('#modalVisitante').modal('hide');
     });
 
+    // Capturar foto de la cámara
     $('#btnCapturar').click(function () {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/png');
@@ -23,12 +26,11 @@ $(document).ready(function () {
         $('#previewImg').attr('src', dataUrl).show();
     });
 
+    // Enviar formulario
     $('#formVisitante').submit(function (e) {
         e.preventDefault();
-        
-        if (!$(this).valid()) {
-        return; 
-        }
+
+        if (!$(this).valid()) return;
 
         const formData = $(this).serialize();
         console.log("Datos enviados:", formData);
@@ -38,39 +40,51 @@ $(document).ready(function () {
             type: 'POST',
             data: formData,
             success: function () {
-                alert('Visitante registrado exitosamente');
-                detenerCamara();
-                $('#modalVisitante').modal('hide');
-                location.reload();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Éxito',
+                    text: 'Visitante registrado exitosamente',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    detenerCamara();
+                    $('#modalVisitante').modal('hide');
+                    location.reload();
+                });
             },
             error: function (xhr) {
                 console.error("Respuesta completa del error:", xhr);
 
                 let response = xhr.responseJSON;
-                let mensaje = "Error al registrar:";
+                let mensaje = "";
 
                 if (response?.errors) {
                     for (const campo in response.errors) {
-                        mensaje += `\n- ${campo}: ${response.errors[campo].join(', ')}`;
+                        mensaje += `<p><strong>${campo}:</strong> ${response.errors[campo].join(', ')}</p>`;
                     }
                 } else if (response?.error) {
-                    mensaje += `\n- ${response.error}`;
+                    mensaje += `<p>${response.error}</p>`;
                     if (response.inner) {
-                        mensaje += `\n- Detalle: ${response.inner}`;
+                        mensaje += `<p>Detalle: ${response.inner}</p>`;
                     }
                 } else {
-                    mensaje += `\n- Estado HTTP: ${xhr.status} ${xhr.statusText}`;
+                    mensaje += `<p>Estado HTTP: ${xhr.status} ${xhr.statusText}</p>`;
                 }
 
-                alert(mensaje);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al registrar',
+                    html: mensaje
+                });
             }
         });
     });
 
+    // Inicializar cámara
     video = document.getElementById('videoCamara');
     canvas = document.getElementById('canvasFoto');
     context = canvas.getContext('2d');
 
+    // Inicializar Select2
     $('#selectRecluso').select2({
         dropdownParent: $('#modalVisitante')
     });
@@ -85,7 +99,11 @@ function iniciarCamara() {
         })
         .catch(function (err) {
             console.error('Error al acceder a la cámara: ', err);
-            alert('No se pudo acceder a la cámara');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo acceder a la cámara'
+            });
         });
 }
 
